@@ -21,8 +21,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,57 +31,50 @@ import (
 )
 
 var _ = Describe("PlatformTenant Controller", func() {
-	Context("When reconciling a resource", func() {
-		const (
-			resourceName      = "test-resource"
-			resourceNamespace = "default"
-		)
+	Context("When reconciling a root tenant", func() {
+		const resourceName = "pt-test"
 
 		ctx := context.Background()
-
-		typeNamespacedName := types.NamespacedName{
-			Name:      resourceName,
-			Namespace: resourceNamespace,
-		}
-		platformtenant := &tenancyv1alpha1.PlatformTenant{}
+		typeNamespacedName := types.NamespacedName{Name: resourceName}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind PlatformTenant")
-			err := k8sClient.Get(ctx, typeNamespacedName, platformtenant)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &tenancyv1alpha1.PlatformTenant{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: resourceNamespace,
-					},
-					// TODO(user): Specify other spec details if needed.
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			By("creating a root PlatformTenant")
+			resource := &tenancyv1alpha1.PlatformTenant{
+				ObjectMeta: metav1.ObjectMeta{Name: resourceName},
+				Spec:       tenancyv1alpha1.PlatformTenantSpec{DisplayName: "PT Test"},
 			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 		})
 
 		AfterEach(func() {
-			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &tenancyv1alpha1.PlatformTenant{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("Cleanup the specific resource instance PlatformTenant")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			By("cleaning up the PlatformTenant and its auto-created TenantProfile")
+			pt := &tenancyv1alpha1.PlatformTenant{ObjectMeta: metav1.ObjectMeta{Name: resourceName}}
+			Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, pt))).To(Succeed())
+			profile := &tenancyv1alpha1.TenantProfile{ObjectMeta: metav1.ObjectMeta{Name: resourceName}}
+			Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, profile))).To(Succeed())
 		})
-		It("should successfully reconcile the resource", func() {
-			By("Reconciling the created resource")
+
+		It("computes the root and creates a restrictive TenantProfile", func() {
 			controllerReconciler := &PlatformTenantReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}
-
-			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
+
+			By("setting status.root to itself for a root tenant")
+			pt := &tenancyv1alpha1.PlatformTenant{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, pt)).To(Succeed())
+			Expect(pt.Status.Root).To(Equal(resourceName))
+
+			By("auto-creating a restrictive TenantProfile owned by the tenant")
+			profile := &tenancyv1alpha1.TenantProfile{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, profile)).To(Succeed())
+			Expect(profile.Spec.Tenant).To(Equal(resourceName))
+			Expect(profile.Spec.Defaults.MaxProjects).To(Equal(int32(0)))
+			Expect(profile.Spec.Defaults.NetworkIsolation).To(Equal("tenant"))
+			Expect(profile.OwnerReferences).To(HaveLen(1))
+			Expect(profile.OwnerReferences[0].Name).To(Equal(resourceName))
 		})
 	})
 })
