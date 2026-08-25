@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	authenticationv1 "k8s.io/api/authentication/v1"
@@ -76,10 +77,8 @@ func (a *authorizer) isTrusted(u authenticationv1.UserInfo) bool {
 		if g == operatorSAGroup {
 			return true
 		}
-		for _, admin := range a.clusterAdminGroups {
-			if g == admin {
-				return true
-			}
+		if slices.Contains(a.clusterAdminGroups, g) {
+			return true
 		}
 	}
 	return false
@@ -91,11 +90,7 @@ func subjectMatches(s tenancyv1alpha1.Subject, u authenticationv1.UserInfo) bool
 	case "User":
 		return s.Name == u.Username
 	case "Group":
-		for _, g := range u.Groups {
-			if g == s.Name {
-				return true
-			}
-		}
+		return slices.Contains(u.Groups, s.Name)
 	case "ServiceAccount":
 		return u.Username == fmt.Sprintf("system:serviceaccount:%s:%s", s.Namespace, s.Name)
 	}

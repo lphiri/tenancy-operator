@@ -51,7 +51,6 @@ func (r *TenantProjectReconciler) ensureNetworkPolicies(ctx context.Context, tp 
 	desired := r.desiredNetworkPolicies(tp, ns, isolation)
 
 	for _, np := range desired {
-		np := np
 		policy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: np.Name, Namespace: ns.Name}}
 		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, policy, func() error {
 			policy.Spec = np.Spec
