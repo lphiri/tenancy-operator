@@ -1,0 +1,15 @@
+apiVersion: tenancy.opendatahub.io/v1alpha1
+kind: TenantProject
+metadata:
+  name: genomics-analysis
+spec:
+  tenant: genomics
+  displayName: "Genomics Analysis"
+  users:
+    - kind: User
+      name: bob
+      role: edit
+    - kind: User
+      name: carol
+      role: view
+  # networkIsolation omitted: inherits the tenant profile default.

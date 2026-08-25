@@ -1,0 +1,5 @@
+# Exclude build artifacts, tests, and VCS metadata from the build context.
+bin/
+testbin/
+**/*_test.go
+.git/

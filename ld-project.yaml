@@ -1,0 +1,15 @@
+apiVersion: tenancy.opendatahub.io/v1alpha1
+kind: TenantProject
+metadata:
+  name: ld-test
+spec:
+  displayName: Genomics Analysis
+  tenant: genomics
+  users:
+  - kind: User
+    name: bob
+    role: edit
+  - kind: User
+    name: carol
+    role: view
+

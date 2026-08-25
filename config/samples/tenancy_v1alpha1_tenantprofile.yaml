@@ -1,0 +1,13 @@
+apiVersion: tenancy.opendatahub.io/v1alpha1
+kind: TenantProfile
+metadata:
+  # name must equal spec.tenant (1:1 with a PlatformTenant).
+  name: genomics
+spec:
+  tenant: genomics
+  admins:
+    - kind: User
+      name: alice
+  defaults:
+    networkIsolation: tenant
+    maxProjects: 2

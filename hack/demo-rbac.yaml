@@ -1,0 +1,23 @@
+# Grants demo users full RBAC on the tenancy CRDs so the validating webhook,
+# not Kubernetes RBAC, is the authorization gate we are demonstrating.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tenancy-demo-users
+rules:
+  - apiGroups: ["tenancy.opendatahub.io"]
+    resources: ["platformtenants", "tenantprofiles", "tenantprojects"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tenancy-demo-users
+subjects:
+  - kind: Group
+    name: tenancy-users
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: tenancy-demo-users
+  apiGroup: rbac.authorization.k8s.io

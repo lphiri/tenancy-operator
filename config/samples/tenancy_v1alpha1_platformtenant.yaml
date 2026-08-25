@@ -1,0 +1,7 @@
+apiVersion: tenancy.opendatahub.io/v1alpha1
+kind: PlatformTenant
+metadata:
+  name: research-division
+spec:
+  displayName: "Research Division"
+  # parent omitted: this is a root tenant.
