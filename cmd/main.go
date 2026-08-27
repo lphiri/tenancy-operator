@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"flag"
 	"os"
@@ -36,7 +37,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	tenancyv1alpha1 "github.com/opendatahub-io/tenancy-operator/api/v1alpha1"
-	"github.com/opendatahub-io/tenancy-operator/internal/controller"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/platformtenant"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantprofile"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantproject"
 	webhookv1alpha1 "github.com/opendatahub-io/tenancy-operator/internal/webhook/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
@@ -179,24 +182,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := (&controller.PlatformTenantReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	ctx := context.Background()
+	if err := platformtenant.NewPlatformTenantReconciler(ctx, mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "platformtenant")
 		os.Exit(1)
 	}
-	if err := (&controller.TenantProfileReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	if err := tenantprofile.NewTenantProfileReconciler(ctx, mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "tenantprofile")
 		os.Exit(1)
 	}
-	if err := (&controller.TenantProjectReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	if err := tenantproject.NewTenantProjectReconciler(ctx, mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "tenantproject")
 		os.Exit(1)
 	}

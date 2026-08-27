@@ -17,9 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/opendatahub-io/odh-platform-utilities/framework/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+// Check that it implements api.PlatformObject.
+var _ api.PlatformObject = (*PlatformTenant)(nil)
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -39,23 +43,12 @@ type PlatformTenantSpec struct {
 
 // PlatformTenantStatus defines the observed state of PlatformTenant.
 type PlatformTenantStatus struct {
+	// Embed common status for PlatformObject compliance
+	api.Status `json:",inline"`
+
 	// root is the name of the root tenant at the top of this tenant's lineage.
 	// +optional
 	Root string `json:"root,omitempty"`
-
-	// conditions represent the current state of the PlatformTenant resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
-	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -96,4 +89,16 @@ func init() {
 		s.AddKnownTypes(SchemeGroupVersion, &PlatformTenant{}, &PlatformTenantList{})
 		return nil
 	})
+}
+
+func (pt *PlatformTenant) GetStatus() *api.Status {
+	return &pt.Status.Status
+}
+
+func (pt *PlatformTenant) GetConditions() []api.Condition {
+	return pt.Status.GetConditions()
+}
+
+func (pt *PlatformTenant) SetConditions(conditions []api.Condition) {
+	pt.Status.SetConditions(conditions)
 }

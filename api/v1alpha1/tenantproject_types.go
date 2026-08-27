@@ -17,9 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/opendatahub-io/odh-platform-utilities/framework/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+// Check that it implements common.PlatformObject.
+var _ api.PlatformObject = (*TenantProject)(nil)
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -67,29 +71,12 @@ type ProjectUser struct {
 
 // TenantProjectStatus defines the observed state of TenantProject.
 type TenantProjectStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Embed common status for PlatformObject compliance
+	api.Status `json:",inline"`
 
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
-
-	// conditions represent the current state of the TenantProject resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
 	// namespace is the name of the provisioned project Namespace.
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
-
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
-	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -130,4 +117,16 @@ func init() {
 		s.AddKnownTypes(SchemeGroupVersion, &TenantProject{}, &TenantProjectList{})
 		return nil
 	})
+}
+
+func (t *TenantProject) GetStatus() *api.Status {
+	return &t.Status.Status
+}
+
+func (t *TenantProject) GetConditions() []api.Condition {
+	return t.Status.GetConditions()
+}
+
+func (t *TenantProject) SetConditions(conditions []api.Condition) {
+	t.Status.SetConditions(conditions)
 }
