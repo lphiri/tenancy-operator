@@ -17,12 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/opendatahub-io/odh-platform-utilities/framework/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Check that it implements api.PlatformObject.
+var _ api.PlatformObject = (*TenantProfile)(nil)
 
 // TenantProfileSpec defines the desired state of TenantProfile.
 // It holds a tenant's self-managed configuration. It is auto-created 1:1 with a
@@ -61,25 +62,8 @@ type ProjectDefaults struct {
 
 // TenantProfileStatus defines the observed state of TenantProfile.
 type TenantProfileStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
-
-	// conditions represent the current state of the TenantProfile resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
-	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	// Embed common status for PlatformObject compliance
+	api.Status `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
@@ -120,4 +104,16 @@ func init() {
 		s.AddKnownTypes(SchemeGroupVersion, &TenantProfile{}, &TenantProfileList{})
 		return nil
 	})
+}
+
+func (tprof *TenantProfile) GetStatus() *api.Status {
+	return &tprof.Status.Status
+}
+
+func (tprof *TenantProfile) GetConditions() []api.Condition {
+	return tprof.Status.GetConditions()
+}
+
+func (tprof *TenantProfile) SetConditions(conditions []api.Condition) {
+	tprof.Status.SetConditions(conditions)
 }
