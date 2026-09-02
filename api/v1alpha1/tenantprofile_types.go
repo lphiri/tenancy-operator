@@ -42,6 +42,60 @@ type TenantProfileSpec struct {
 	// defaults are applied to TenantProjects created in this tenant.
 	// +optional
 	Defaults ProjectDefaults `json:"defaults,omitempty"`
+
+	// Services contains optional platform services provisioned for this tenant.
+	// +optional
+	Services TenantServices `json:"services,omitempty"`
+}
+
+// TenantServices defines optional delegated platform services.
+type TenantServices struct {
+	// MaaS enables delegated Models-as-a-Service tenant provisioning. MaaS is
+	// currently supported only for root tenants.
+	// +optional
+	MaaS *MaaSService `json:"maas,omitempty"`
+}
+
+// MaaSService is the desired configuration for a provisioned AITenant.
+type MaaSService struct {
+	// Enabled controls whether the tenancy controller owns an AITenant.
+	Enabled bool `json:"enabled,omitempty"`
+	// OIDC configures the identity provider used by the AI Gateway.
+	// +optional
+	OIDC *MaaSOIDC `json:"oidc,omitempty"`
+	// Gateway references a network-admin-provisioned Gateway.
+	// +optional
+	Gateway *MaaSGateway `json:"gateway,omitempty"`
+	// TLS references the certificate used by the tenant gateway.
+	// +optional
+	TLS *MaaSTLS `json:"tls,omitempty"`
+	// Quotas limits MaaS control-plane objects, not compute resources.
+	// +optional
+	Quotas *MaaSQuotas `json:"quotas,omitempty"`
+}
+
+type MaaSOIDC struct {
+	IssuerURL string `json:"issuerUrl"`
+	ClientID  string `json:"clientId"`
+}
+
+type MaaSGateway struct {
+	Name string `json:"name"`
+}
+
+type MaaSTLS struct {
+	CertificateRef MaaSCertificateRef `json:"certificateRef"`
+}
+
+type MaaSCertificateRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+}
+
+type MaaSQuotas struct {
+	MaxModels        int32 `json:"maxModels,omitempty"`
+	MaxSubscriptions int32 `json:"maxSubscriptions,omitempty"`
+	MaxAPIKeys       int32 `json:"maxApiKeys,omitempty"`
 }
 
 // ProjectDefaults are the restrictive defaults a tenant applies to its projects.
@@ -64,6 +118,19 @@ type ProjectDefaults struct {
 type TenantProfileStatus struct {
 	// Embed common status for PlatformObject compliance
 	api.Status `json:",inline"`
+
+	// MaaS reports the status of the owned AITenant, when enabled.
+	// +optional
+	MaaS MaaSStatus `json:"maas,omitempty"`
+}
+
+type MaaSStatus struct {
+	// +optional
+	AITenant string `json:"aiTenant,omitempty"`
+	// +optional
+	Ready bool `json:"ready,omitempty"`
+	// +optional
+	Message string `json:"message,omitempty"`
 }
 
 // +kubebuilder:object:root=true

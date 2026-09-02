@@ -100,6 +100,72 @@ spec:
                     - strict
                     type: string
                 type: object
+              services:
+                description: Services contains optional platform services provisioned
+                  for this tenant.
+                properties:
+                  maas:
+                    description: |-
+                      MaaS enables delegated Models-as-a-Service tenant provisioning. MaaS is
+                      currently supported only for root tenants.
+                    properties:
+                      enabled:
+                        description: Enabled controls whether the tenancy controller
+                          owns an AITenant.
+                        type: boolean
+                      gateway:
+                        description: Gateway references a network-admin-provisioned
+                          Gateway.
+                        properties:
+                          name:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      oidc:
+                        description: OIDC configures the identity provider used by
+                          the AI Gateway.
+                        properties:
+                          clientId:
+                            type: string
+                          issuerUrl:
+                            type: string
+                        required:
+                        - clientId
+                        - issuerUrl
+                        type: object
+                      quotas:
+                        description: Quotas limits MaaS control-plane objects, not
+                          compute resources.
+                        properties:
+                          maxApiKeys:
+                            format: int32
+                            type: integer
+                          maxModels:
+                            format: int32
+                            type: integer
+                          maxSubscriptions:
+                            format: int32
+                            type: integer
+                        type: object
+                      tls:
+                        description: TLS references the certificate used by the tenant
+                          gateway.
+                        properties:
+                          certificateRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        required:
+                        - certificateRef
+                        type: object
+                    type: object
+                type: object
               tenant:
                 description: |-
                   tenant is the name of the PlatformTenant this profile configures. It is
@@ -168,6 +234,16 @@ spec:
                   type: object
                 type: array
                 x-kubernetes-list-type: atomic
+              maas:
+                description: MaaS reports the status of the owned AITenant, when enabled.
+                properties:
+                  aiTenant:
+                    type: string
+                  message:
+                    type: string
+                  ready:
+                    type: boolean
+                type: object
               observedGeneration:
                 description: The generation observed by the resource controller.
                 format: int64
