@@ -14,9 +14,12 @@ Three cluster-scoped CRDs in group `tenancy.opendatahub.io/v1alpha1`:
   parent (empty = root). The reconciler computes `status.root` by walking the
   chain and auto-creates a restrictive **TenantProfile** (maxProjects=0,
   networkIsolation=tenant) for every new tenant.
-- **TenantProfile** - per-tenant config (name must equal `spec.tenant`):
+- **TenantProfile** - per-tenant policy (name must equal `spec.tenant`):
   `spec.admins` and `spec.defaults` (networkIsolation none/tenant/strict,
   maxProjects). Self-managed: the operator never overwrites an existing one.
+- **TenantMaaS** - independently managed MaaS configuration for a root tenant.
+  It references `spec.tenantRef.name` and provisions an owned `AITenant` when
+  the MaaS CRD is installed.
 - **TenantProject** - a workload namespace under a tenant. The reconciler
   provisions the Namespace (labeled with tenant + root), edit/view RoleBindings
   from `spec.users`, and NetworkPolicies matching the effective isolation.

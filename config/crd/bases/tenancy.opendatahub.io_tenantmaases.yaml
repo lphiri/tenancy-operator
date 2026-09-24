@@ -4,32 +4,21 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.21.0
-  name: tenantprofiles.tenancy.opendatahub.io
+  name: tenantmaases.tenancy.opendatahub.io
 spec:
   group: tenancy.opendatahub.io
   names:
-    kind: TenantProfile
-    listKind: TenantProfileList
-    plural: tenantprofiles
+    kind: TenantMaaS
+    listKind: TenantMaaSList
+    plural: tenantmaases
     shortNames:
-    - tprof
-    singular: tenantprofile
+    - tmaas
+    singular: tenantmaas
   scope: Cluster
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.tenant
-      name: Tenant
-      type: string
-    - jsonPath: .spec.defaults.maxProjects
-      name: MaxProjects
-      type: integer
-    - jsonPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: TenantProfile is the Schema for the tenantprofiles API
         properties:
           apiVersion:
             description: |-
@@ -49,69 +38,69 @@ spec:
           metadata:
             type: object
           spec:
-            description: spec defines the desired state of TenantProfile
+            description: TenantMaaSSpec defines an independently managed MaaS service
+              for a tenant.
             properties:
-              admins:
-                description: |-
-                  admins are subjects with administrative authority over this tenant.
-                  Ancestor admins additionally inherit authority via the hierarchy.
-                items:
-                  description: Subject identifies a user, group, or service account
-                    that holds authority.
-                  properties:
-                    kind:
-                      description: kind is the RBAC subject kind.
-                      enum:
-                      - User
-                      - Group
-                      - ServiceAccount
-                      type: string
-                    name:
-                      description: name is the subject name.
-                      minLength: 1
-                      type: string
-                    namespace:
-                      description: namespace is required only when kind is ServiceAccount.
-                      type: string
-                  required:
-                  - kind
-                  - name
-                  type: object
-                type: array
-              defaults:
-                description: defaults are applied to TenantProjects created in this
-                  tenant.
+              gateway:
                 properties:
-                  maxProjects:
-                    default: 0
-                    description: |-
-                      maxProjects caps how many TenantProjects this tenant may own. Zero (the
-                      restrictive default) means no projects until an admin raises it.
-                    format: int32
-                    minimum: 0
-                    type: integer
-                  networkIsolation:
-                    default: tenant
-                    description: networkIsolation is the default isolation preset
-                      for new projects.
-                    enum:
-                    - none
-                    - tenant
-                    - strict
+                  name:
                     type: string
+                required:
+                - name
                 type: object
-              tenant:
-                description: |-
-                  tenant is the name of the PlatformTenant this profile configures. It is
-                  set at creation and immutable (enforced by webhook).
-                minLength: 1
-                type: string
+              oidc:
+                properties:
+                  clientId:
+                    type: string
+                  issuerUrl:
+                    type: string
+                required:
+                - clientId
+                - issuerUrl
+                type: object
+              quotas:
+                properties:
+                  maxApiKeys:
+                    format: int32
+                    type: integer
+                  maxModels:
+                    format: int32
+                    type: integer
+                  maxSubscriptions:
+                    format: int32
+                    type: integer
+                type: object
+              tenantRef:
+                description: tenantRef identifies the PlatformTenant served by this
+                  resource.
+                properties:
+                  name:
+                    minLength: 1
+                    type: string
+                required:
+                - name
+                type: object
+              tls:
+                properties:
+                  certificateRef:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                required:
+                - certificateRef
+                type: object
             required:
-            - tenant
+            - tenantRef
             type: object
           status:
-            description: status defines the observed state of TenantProfile
             properties:
+              aiTenant:
+                type: string
               conditions:
                 items:
                   properties:
@@ -168,12 +157,16 @@ spec:
                   type: object
                 type: array
                 x-kubernetes-list-type: atomic
+              message:
+                type: string
               observedGeneration:
                 description: The generation observed by the resource controller.
                 format: int64
                 type: integer
               phase:
                 type: string
+              ready:
+                type: boolean
             type: object
         required:
         - spec

@@ -31,4 +31,6 @@ resources:
 - platformtenant_admin_role.yaml
 - platformtenant_editor_role.yaml
 - platformtenant_viewer_role.yaml
-
+- tenantmaas_admin_role.yaml
+- tenantmaas_editor_role.yaml
+- tenantmaas_viewer_role.yaml

@@ -115,6 +115,9 @@ var _ = BeforeSuite(func() {
 	err = SetupTenantProfileWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = SetupTenantMaaSWebhookWithManager(mgr)
+	Expect(err).NotTo(HaveOccurred())
+
 	err = SetupTenantProjectWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 

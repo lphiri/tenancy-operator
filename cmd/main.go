@@ -38,6 +38,7 @@ import (
 
 	tenancyv1alpha1 "github.com/opendatahub-io/tenancy-operator/api/v1alpha1"
 	"github.com/opendatahub-io/tenancy-operator/internal/controller/platformtenant"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantmaas"
 	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantprofile"
 	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantproject"
 	webhookv1alpha1 "github.com/opendatahub-io/tenancy-operator/internal/webhook/v1alpha1"
@@ -191,6 +192,10 @@ func main() {
 		setupLog.Error(err, "Failed to create controller", "controller", "tenantprofile")
 		os.Exit(1)
 	}
+	if err := tenantmaas.NewTenantMaaSReconciler(ctx, mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "tenantmaas")
+		os.Exit(1)
+	}
 	if err := tenantproject.NewTenantProjectReconciler(ctx, mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "tenantproject")
 		os.Exit(1)
@@ -199,6 +204,12 @@ func main() {
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err := webhookv1alpha1.SetupPlatformTenantWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "Failed to create webhook", "webhook", "PlatformTenant")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err := webhookv1alpha1.SetupTenantMaaSWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "TenantMaaS")
 			os.Exit(1)
 		}
 	}
