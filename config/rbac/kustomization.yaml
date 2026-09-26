@@ -22,15 +22,15 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the tenancy-operator itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- tenantproject_admin_role.yaml
-- tenantproject_editor_role.yaml
-- tenantproject_viewer_role.yaml
-- tenantprofile_admin_role.yaml
-- tenantprofile_editor_role.yaml
-- tenantprofile_viewer_role.yaml
-- platformtenant_admin_role.yaml
-- platformtenant_editor_role.yaml
-- platformtenant_viewer_role.yaml
-- tenantmaas_admin_role.yaml
-- tenantmaas_editor_role.yaml
-- tenantmaas_viewer_role.yaml
+- organizationproject_admin_role.yaml
+- organizationproject_editor_role.yaml
+- organizationproject_viewer_role.yaml
+- organizationprofile_admin_role.yaml
+- organizationprofile_editor_role.yaml
+- organizationprofile_viewer_role.yaml
+- organization_admin_role.yaml
+- organization_editor_role.yaml
+- organization_viewer_role.yaml
+- maasconfiguration_admin_role.yaml
+- maasconfiguration_editor_role.yaml
+- maasconfiguration_viewer_role.yaml

@@ -1,0 +1,13 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: MaaSConfiguration
+metadata:
+  name: research-division
+spec:
+  organizationRef:
+    name: research-division
+  oidc:
+    clientId: research-division-maas
+  quotas:
+    maxModels: 20
+    maxSubscriptions: 100
+    maxApiKeys: 50

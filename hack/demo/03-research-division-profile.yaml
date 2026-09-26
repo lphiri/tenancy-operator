@@ -1,0 +1,21 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: OrganizationProfile
+metadata:
+  name: research-division
+spec:
+  organizationRef:
+    name: research-division
+  admins:
+    - kind: User
+      name: alice
+  defaults:
+    networkIsolation: tenant
+    maxProjects: 0
+  platform:
+    oidc:
+      issuerUrl: https://sso.example.com/realms/rhoai
+    ingressGatewayRef:
+      group: gateway.networking.k8s.io
+      kind: Gateway
+      name: tenant-gateway
+      namespace: openshift-ingress

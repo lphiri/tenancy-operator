@@ -1,0 +1,7 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: Organization
+metadata:
+  name: research-division
+  annotations:
+    organization.opendatahub.io/display-name: Research Division
+spec: {}

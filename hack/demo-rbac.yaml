@@ -5,8 +5,8 @@ kind: ClusterRole
 metadata:
   name: tenancy-demo-users
 rules:
-  - apiGroups: ["tenancy.opendatahub.io"]
-    resources: ["platformtenants", "tenantprofiles", "tenantprojects"]
+  - apiGroups: ["organization.opendatahub.io"]
+    resources: ["organizations", "organizationprofiles", "organizationprojects", "maasconfigurations"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

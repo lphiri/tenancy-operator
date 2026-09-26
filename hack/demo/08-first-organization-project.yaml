@@ -1,0 +1,14 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: OrganizationProject
+metadata:
+  name: genomics-analysis
+spec:
+  organizationRef:
+    name: genomics
+  users:
+    - kind: User
+      name: bob
+      role: edit
+    - kind: User
+      name: carol
+      role: view

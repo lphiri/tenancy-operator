@@ -1,0 +1,6 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: Organization
+metadata:
+  name: genomics
+spec:
+  parent: research-division-2

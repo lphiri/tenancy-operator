@@ -1,0 +1,8 @@
+# research-division (level 1) -> genomics (level 2) -> proteomics (level 3)
+# is valid. This fourth-level organization is expected to reconcile as failed.
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: Organization
+metadata:
+  name: depth-04
+spec:
+  parent: proteomics
