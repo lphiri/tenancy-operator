@@ -14,10 +14,10 @@ authorization demo.
 
 ## Prerequisites
 
-- `oc`, `kubectl`, `git`, and `make`
+- `oc`, `kubectl`, `git`, `make`, and Podman or Docker
 - An OpenShift cluster and a cluster-admin login
 - cert-manager installed and healthy
-- Access to `quay.io/lphiri/tenancy-operator:poc`
+- Push and pull access to `quay.io/lphiri/tenancy-operator`
 
 The operator uses cert-manager for its webhook certificates. If cert-manager
 is not already installed, install it using the OpenShift cert-manager Operator
@@ -31,6 +31,46 @@ oc -n cert-manager wait --for=condition=Available deployment/cert-manager-cainje
 oc -n cert-manager wait --for=condition=Available deployment/cert-manager-webhook --timeout=120s
 ```
 
+## Build, push, and deploy a new image
+
+Run this command from the repository root. It uses a unique tag for each build
+so the cluster does not reuse an older image:
+
+```sh
+./hack/deploy-quay.sh
+```
+
+The script defaults to Podman, `oc`, and
+`quay.io/lphiri/tenancy-operator`. Log in to both Quay and OpenShift before
+running it:
+
+```sh
+podman login quay.io
+oc login https://api.<cluster-domain>:6443
+```
+
+Use Docker instead of Podman, or select a specific tag, with environment
+overrides:
+
+```sh
+CONTAINER_TOOL=docker IMAGE_TAG=poc-20260927 ./hack/deploy-quay.sh
+```
+
+The script pushes the image directly to Quay. No `docker save`, archive, or
+archive modification step is required. If your Quay organization is different,
+set `IMAGE_REPOSITORY` to that organization or namespace:
+
+```sh
+IMAGE_REPOSITORY=quay.io/<quay-namespace>/tenancy-operator \
+  ./hack/deploy-quay.sh
+```
+
+For Docker users, authenticate with:
+
+```sh
+docker login quay.io
+```
+
 ## Deploy the controller from Quay
 
 Log in to the OpenShift cluster and select the context you want to use:
@@ -38,7 +78,8 @@ Log in to the OpenShift cluster and select the context you want to use:
 ```sh
 oc login https://api.<cluster-domain>:6443
 export CTX="$(oc config current-context)"
-export IMAGE=quay.io/lphiri/tenancy-operator:poc
+# Keep the image just pushed, or choose an existing tag.
+export IMAGE="${IMAGE:-quay.io/lphiri/tenancy-operator:poc}"
 ```
 
 Deploy the CRDs, RBAC, webhook, and controller. `KUBECTL=oc` makes the

@@ -17,5 +17,5 @@ spec:
     ingressGatewayRef:
       group: gateway.networking.k8s.io
       kind: Gateway
-      name: tenant-gateway
+      name: reasearch-tenant-gateway
       namespace: openshift-ingress

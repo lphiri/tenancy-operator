@@ -37,6 +37,8 @@ const (
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations,verbs=get;list;watch
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizationprofiles,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="",resources=namespaces/finalizers,verbs=update
+// +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizationprojects/finalizers,verbs=update
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles,verbs=bind,resourceNames=edit;view
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete

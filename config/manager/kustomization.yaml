@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/lphiri/tenancy-operator
-  newTag: poc
+  newTag: poc-20260926155836

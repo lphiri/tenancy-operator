@@ -19,6 +19,7 @@ const (
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=maasconfigurations/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=maasconfigurations/finalizers,verbs=update
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations,verbs=get;list;watch
+// +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations/finalizers,verbs=update
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizationprofiles,verbs=get;list;watch
 // +kubebuilder:rbac:groups=maas.opendatahub.io,resources=aitenants,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=maas.opendatahub.io,resources=aitenants/status,verbs=get;watch

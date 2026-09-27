@@ -27,6 +27,7 @@ import (
 )
 
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations/finalizers,verbs=update
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizations/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=organization.opendatahub.io,resources=organizationprofiles,verbs=get;list;watch;create
 
