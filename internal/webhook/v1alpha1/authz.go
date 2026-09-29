@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	maxAncestorWalk   = 20
+	maxAncestorWalk   = 3
 	defaultOperatorNS = "tenancy-operator-system"
 )
 
@@ -41,8 +41,8 @@ const (
 // ("kubeadm:cluster-admins") and direct system:masters bindings.
 var defaultClusterAdminGroups = []string{"system:masters", "kubeadm:cluster-admins"}
 
-// authorizer answers "may this requester act on this tenant?" using the
-// hierarchy and the admins declared on each TenantProfile.
+// authorizer answers "may this requester act on this organization?" using the
+// hierarchy and the admins declared on each OrganizationProfile.
 type authorizer struct {
 	reader             client.Reader
 	operatorNamespace  string
@@ -69,8 +69,8 @@ func userFromContext(ctx context.Context) (authenticationv1.UserInfo, error) {
 	return req.UserInfo, nil
 }
 
-// isTrusted bypasses tenant checks for cluster-admins and the operator's own
-// service account (which auto-creates restrictive TenantProfiles).
+// isTrusted bypasses organization checks for cluster-admins and the operator's
+// own service account (which auto-creates restrictive OrganizationProfiles).
 func (a *authorizer) isTrusted(u authenticationv1.UserInfo) bool {
 	operatorSAGroup := "system:serviceaccounts:" + a.operatorNamespace
 	for _, g := range u.Groups {
@@ -97,11 +97,11 @@ func subjectMatches(s tenancyv1alpha1.Subject, u authenticationv1.UserInfo) bool
 	return false
 }
 
-// selfAdmin reports whether the user is an admin listed on the tenant's own
-// TenantProfile. A missing profile means no admins, so no match.
-func (a *authorizer) selfAdmin(ctx context.Context, u authenticationv1.UserInfo, tenant string) (bool, error) {
-	var p tenancyv1alpha1.TenantProfile
-	if err := a.reader.Get(ctx, client.ObjectKey{Name: tenant}, &p); err != nil {
+// selfAdmin reports whether the user is an admin listed on the organization's
+// own OrganizationProfile. A missing profile means no admins, so no match.
+func (a *authorizer) selfAdmin(ctx context.Context, u authenticationv1.UserInfo, organization string) (bool, error) {
+	var p tenancyv1alpha1.OrganizationProfile
+	if err := a.reader.Get(ctx, client.ObjectKey{Name: organization}, &p); err != nil {
 		if apierrors.IsNotFound(err) {
 			return false, nil
 		}
@@ -115,10 +115,10 @@ func (a *authorizer) selfAdmin(ctx context.Context, u authenticationv1.UserInfo,
 	return false, nil
 }
 
-// ancestorAdmin walks the tenant and its ancestors, returning true if the user
+// ancestorAdmin walks the organization and its ancestors, returning true if the user
 // is an admin anywhere along the chain.
-func (a *authorizer) ancestorAdmin(ctx context.Context, u authenticationv1.UserInfo, tenant string) (bool, error) {
-	cur := tenant
+func (a *authorizer) ancestorAdmin(ctx context.Context, u authenticationv1.UserInfo, organization string) (bool, error) {
+	cur := organization
 	for range maxAncestorWalk {
 		if cur == "" {
 			return false, nil
@@ -130,21 +130,21 @@ func (a *authorizer) ancestorAdmin(ctx context.Context, u authenticationv1.UserI
 		if ok {
 			return true, nil
 		}
-		var pt tenancyv1alpha1.PlatformTenant
-		if err := a.reader.Get(ctx, client.ObjectKey{Name: cur}, &pt); err != nil {
+		var parent tenancyv1alpha1.Organization
+		if err := a.reader.Get(ctx, client.ObjectKey{Name: cur}, &parent); err != nil {
 			if apierrors.IsNotFound(err) {
 				return false, nil
 			}
 			return false, err
 		}
-		cur = pt.Spec.Parent
+		cur = parent.Spec.Parent
 	}
 	return false, nil
 }
 
 // requireAncestorAdmin permits the action only if the user is an admin of the
-// tenant or any ancestor (or is trusted).
-func (a *authorizer) requireAncestorAdmin(ctx context.Context, tenant, action string) error {
+// organization or any ancestor (or is trusted).
+func (a *authorizer) requireAncestorAdmin(ctx context.Context, organization, action string) error {
 	u, err := userFromContext(ctx)
 	if err != nil {
 		return err
@@ -152,19 +152,19 @@ func (a *authorizer) requireAncestorAdmin(ctx context.Context, tenant, action st
 	if a.isTrusted(u) {
 		return nil
 	}
-	ok, err := a.ancestorAdmin(ctx, u, tenant)
+	ok, err := a.ancestorAdmin(ctx, u, organization)
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("user %q is not an admin of tenant %q or any ancestor; cannot %s", u.Username, tenant, action)
+		return fmt.Errorf("user %q is not an admin of organization %q or any ancestor; cannot %s", u.Username, organization, action)
 	}
 	return nil
 }
 
 // requireSelfAdmin permits the action only if the user is an admin listed on the
-// tenant's own profile (or is trusted). Ancestors do not inherit config rights.
-func (a *authorizer) requireSelfAdmin(ctx context.Context, tenant, action string) error {
+// organization's own profile (or is trusted). Ancestors do not inherit config rights.
+func (a *authorizer) requireSelfAdmin(ctx context.Context, organization, action string) error {
 	u, err := userFromContext(ctx)
 	if err != nil {
 		return err
@@ -172,12 +172,12 @@ func (a *authorizer) requireSelfAdmin(ctx context.Context, tenant, action string
 	if a.isTrusted(u) {
 		return nil
 	}
-	ok, err := a.selfAdmin(ctx, u, tenant)
+	ok, err := a.selfAdmin(ctx, u, organization)
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("user %q is not an admin of tenant %q; cannot %s", u.Username, tenant, action)
+		return fmt.Errorf("user %q is not an admin of organization %q; cannot %s", u.Username, organization, action)
 	}
 	return nil
 }

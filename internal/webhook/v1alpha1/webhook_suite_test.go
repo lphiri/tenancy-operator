@@ -54,6 +54,11 @@ var (
 	testEnv   *envtest.Environment
 )
 
+const (
+	testOldOrganizationName = "old"
+	testNewOrganizationName = "new"
+)
+
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
@@ -109,13 +114,16 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	err = SetupPlatformTenantWebhookWithManager(mgr)
+	err = SetupOrganizationWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = SetupTenantProfileWebhookWithManager(mgr)
+	err = SetupOrganizationProfileWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = SetupTenantProjectWebhookWithManager(mgr)
+	err = SetupMaaSConfigurationWebhookWithManager(mgr)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = SetupOrganizationProjectWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:webhook

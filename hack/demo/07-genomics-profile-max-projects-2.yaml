@@ -1,0 +1,13 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: OrganizationProfile
+metadata:
+  name: genomics
+spec:
+  organizationRef:
+    name: genomics
+  admins:
+    - kind: User
+      name: alice
+  defaults:
+    networkIsolation: tenant
+    maxProjects: 2

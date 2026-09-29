@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  annotations:
+    opendatahub.io/managed: "false"
+    security.opendatahub.io/authorino-tls-bootstrap: "true"
+  labels:
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/instance: tenant-gateway
+    app.kubernetes.io/name: maas-reasearch
+    istio.io/rev: openshift-gateway
+    opendatahub.io/managed: "false"
+  name: reasearch-tenant-gateway
+  namespace: openshift-ingress
+spec:
+  gatewayClassName: openshift-default
+  listeners:
+  - allowedRoutes:
+      namespaces:
+        from: All
+    hostname: maas-research.example.com
+    name: https
+    port: 443
+    protocol: HTTPS
+    tls:
+      certificateRefs:
+      - group: ""
+        kind: Secret
+        name: router-certs-default
+      mode: Terminate
+

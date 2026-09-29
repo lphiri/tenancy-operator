@@ -1,0 +1,22 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: OrganizationProfile
+metadata:
+  # name must equal spec.organizationRef.name (1:1 with an Organization).
+  name: genomics
+spec:
+  organizationRef:
+    name: genomics
+  admins:
+    - kind: User
+      name: alice
+  defaults:
+    networkIsolation: tenant
+    maxProjects: 2
+  platform:
+    oidc:
+      issuerUrl: https://sso.example.com/realms/rhoai
+    ingressGatewayRef:
+      group: gateway.networking.k8s.io
+      kind: Gateway
+      name: tenant-gateway
+      namespace: openshift-ingress

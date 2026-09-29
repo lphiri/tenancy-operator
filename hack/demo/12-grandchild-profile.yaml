@@ -1,0 +1,13 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: OrganizationProfile
+metadata:
+  name: proteomics
+spec:
+  organizationRef:
+    name: proteomics
+  admins:
+    - kind: User
+      name: carol
+  defaults:
+    networkIsolation: tenant
+    maxProjects: 1

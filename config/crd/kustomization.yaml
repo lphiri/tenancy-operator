@@ -2,9 +2,10 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/tenancy.opendatahub.io_platformtenants.yaml
-- bases/tenancy.opendatahub.io_tenantprofiles.yaml
-- bases/tenancy.opendatahub.io_tenantprojects.yaml
+- bases/organization.opendatahub.io_organizations.yaml
+- bases/organization.opendatahub.io_organizationprofiles.yaml
+- bases/organization.opendatahub.io_organizationprojects.yaml
+- bases/organization.opendatahub.io_maasconfigurations.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

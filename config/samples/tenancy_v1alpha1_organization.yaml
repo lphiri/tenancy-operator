@@ -1,0 +1,8 @@
+apiVersion: organization.opendatahub.io/v1alpha1
+kind: Organization
+metadata:
+  name: genomics
+  annotations:
+    organization.opendatahub.io/display-name: Genomics
+# parent omitted: this is a root organization.
+spec: {}

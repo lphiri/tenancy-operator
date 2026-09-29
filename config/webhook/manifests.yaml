@@ -10,19 +10,20 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-tenancy-opendatahub-io-v1alpha1-platformtenant
+      path: /validate-organization-opendatahub-io-v1alpha1-maasconfiguration
   failurePolicy: Fail
-  name: vplatformtenant-v1alpha1.kb.io
+  name: vmaasconfiguration-v1alpha1.kb.io
   rules:
   - apiGroups:
-    - tenancy.opendatahub.io
+    - organization.opendatahub.io
     apiVersions:
     - v1alpha1
     operations:
     - CREATE
     - UPDATE
+    - DELETE
     resources:
-    - platformtenants
+    - maasconfigurations
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -30,19 +31,19 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-tenancy-opendatahub-io-v1alpha1-tenantprofile
+      path: /validate-organization-opendatahub-io-v1alpha1-organization
   failurePolicy: Fail
-  name: vtenantprofile-v1alpha1.kb.io
+  name: vorganization-v1alpha1.kb.io
   rules:
   - apiGroups:
-    - tenancy.opendatahub.io
+    - organization.opendatahub.io
     apiVersions:
     - v1alpha1
     operations:
     - CREATE
     - UPDATE
     resources:
-    - tenantprofiles
+    - organizations
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -50,17 +51,37 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-tenancy-opendatahub-io-v1alpha1-tenantproject
+      path: /validate-organization-opendatahub-io-v1alpha1-organizationprofile
   failurePolicy: Fail
-  name: vtenantproject-v1alpha1.kb.io
+  name: vorganizationprofile-v1alpha1.kb.io
   rules:
   - apiGroups:
-    - tenancy.opendatahub.io
+    - organization.opendatahub.io
     apiVersions:
     - v1alpha1
     operations:
     - CREATE
     - UPDATE
     resources:
-    - tenantprojects
+    - organizationprofiles
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-organization-opendatahub-io-v1alpha1-organizationproject
+  failurePolicy: Fail
+  name: vorganizationproject-v1alpha1.kb.io
+  rules:
+  - apiGroups:
+    - organization.opendatahub.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - organizationprojects
   sideEffects: None

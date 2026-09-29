@@ -26,6 +26,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -37,9 +38,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	tenancyv1alpha1 "github.com/opendatahub-io/tenancy-operator/api/v1alpha1"
-	"github.com/opendatahub-io/tenancy-operator/internal/controller/platformtenant"
-	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantprofile"
-	"github.com/opendatahub-io/tenancy-operator/internal/controller/tenantproject"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/maasconfiguration"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/organization"
+	organizationprofile "github.com/opendatahub-io/tenancy-operator/internal/controller/organizationprofile"
+	"github.com/opendatahub-io/tenancy-operator/internal/controller/organizationproject"
 	webhookv1alpha1 "github.com/opendatahub-io/tenancy-operator/internal/webhook/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
@@ -51,6 +53,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(apiextensionsv1.AddToScheme(scheme))
 
 	utilruntime.Must(tenancyv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
@@ -183,36 +186,46 @@ func main() {
 	}
 
 	ctx := context.Background()
-	if err := platformtenant.NewPlatformTenantReconciler(ctx, mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "platformtenant")
+	if err := organization.NewOrganizationReconciler(ctx, mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "organization")
 		os.Exit(1)
 	}
-	if err := tenantprofile.NewTenantProfileReconciler(ctx, mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "tenantprofile")
+	if err := organizationprofile.NewOrganizationProfileReconciler(ctx, mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "organizationprofile")
 		os.Exit(1)
 	}
-	if err := tenantproject.NewTenantProjectReconciler(ctx, mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "tenantproject")
+	if err := maasconfiguration.NewMaaSConfigurationReconciler(ctx, mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "maasconfiguration")
+		os.Exit(1)
+	}
+	if err := organizationproject.NewOrganizationProjectReconciler(ctx, mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "organizationproject")
 		os.Exit(1)
 	}
 	// nolint:goconst
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err := webhookv1alpha1.SetupPlatformTenantWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "Failed to create webhook", "webhook", "PlatformTenant")
+		if err := webhookv1alpha1.SetupOrganizationWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "Organization")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err := webhookv1alpha1.SetupMaaSConfigurationWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "MaaSConfiguration")
 			os.Exit(1)
 		}
 	}
 	// nolint:goconst
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err := webhookv1alpha1.SetupTenantProfileWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "Failed to create webhook", "webhook", "TenantProfile")
+		if err := webhookv1alpha1.SetupOrganizationProfileWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "OrganizationProfile")
 			os.Exit(1)
 		}
 	}
 	// nolint:goconst
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err := webhookv1alpha1.SetupTenantProjectWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "Failed to create webhook", "webhook", "TenantProject")
+		if err := webhookv1alpha1.SetupOrganizationProjectWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "OrganizationProject")
 			os.Exit(1)
 		}
 	}
